@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # Copyright (c) 2014 Adafruit Industries
 # Author: Tony DiCola
 
@@ -20,26 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import sys
-
 import Adafruit_DHT
-
 import time
-import sys
-def post_to_mcs(payload): import http, urllib
+import httplib, urllib
 import json
-deviceId = "DfsLIp2l “
-deviceKey = “cu5w0dxIsK1GTHWE“
-
-	headers = {"Content-type": "application/json", "deviceKey": deviceKey}
+deviceId = "DfsLIp2l"
+deviceKey = "cu5w0dxIsK1GTHWE"
+def post_to_mcs(payload):
+	headers = {"Content-type": "application/json", "deviceKey":deviceKey}
 	not_connected = 1
 	while (not_connected):
 		try:
-			conn = http.client.HTTPConnection("api.mediatek.com:80")
+			conn = httplib.HTTPConnection("api.mediatek.com:80")
 			conn.connect()
 			not_connected = 0
-		except (http.client.HTTPException, socket.error) as ex:
-			print "Error: %s" % ex time.sleep(10)
-			 # sleep 10 seconds
+		except (httplib.HTTPException, socket.error) as ex:
+		 	print "Error: %s"%ex
+			time.sleep(10)
+
+		 # sleep 10 seconds
 	conn.request("POST", "/mcs/v2/devices/" + deviceId + "/datapoints", json.dumps(payload), headers)
 	response = conn.getresponse()
 	print( response.status, response.reason, json.dumps(payload), time.strftime("%c"))
@@ -70,13 +69,14 @@ else:
 # the results will be null (because Linux can't
 # guarantee the timing of calls to read the sensor).
 # If this happens try again!
-While true:
-	h0, t0= Adafruit_DHT.read_retry(sensor, pin)
-	if humidity is not None and temperature is not None:
-		print('Temp={0:0.1f}*  Humidity={1:0.1f}%'.format(temperature, humidity))
 
-		payload = {"datapoints":[{"dataChnId":"Humidity","values":{"value":h0}},
-			{"dataChnId":"Temperature","values":{"value":t0}}]}
+while True:
+	h0, t0= Adafruit_DHT.read_retry(11, 4)
+	if h0 is not None and t0 is not None:
+		print('Temp={0:0.1f}*  Humidity={1:0.1f}%'.format(t0, h0))
+
+		payload = {"datapoints":[{"dataChnId":"humidity","values":{"value":h0}},
+			{"dataChnId":"temperature","values":{"value":t0}}]}
 		post_to_mcs(payload)
 		time.sleep(10)
 
